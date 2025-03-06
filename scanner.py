@@ -2,6 +2,7 @@ import re
 import whois
 import socket
 from urllib.parse import urlparse
+import ssl
 
 def Find(string):
     regex = r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))"
@@ -49,13 +50,12 @@ def check_whois(domain_name):
         return f"WHOIS lookup failed: {e}"
 
 def analyze_urls(text):
-    """Extracts URLs, checks SSL certificates (if HTTPS), performs WHOIS lookup, and determines safety."""
     urls = Find(text)
     results = {}
 
     for url in urls:
         parsed_url = urlparse(url)
-        domain = parsed_url.netloc or parsed_url.path.split('/')[0]  # Extract domain
+        domain = parsed_url.netloc or parsed_url.path.split('/')[0] 
 
         ssl_info = get_ssl_certificate(url)
         whois_info = check_whois(domain)
@@ -74,10 +74,11 @@ def analyze_urls(text):
         }
 
     return results
+
 import streamlit as st
 
-st.title("🔍 URL Safety Analyzer")
-st.write("### Enter your query to find job details:")
+st.title("Link Scanner Demo")
+st.write("Kindly insert your email sample below:")
 user_input = st.text_area("Paste email body or text containing URLs:")
 
 if st.button("Analyze URLs"):
@@ -88,16 +89,7 @@ if st.button("Analyze URLs"):
             for url, data in results.items():
                 st.subheader(f"🔗 URL: {url}")
                 st.write(f"**Safety Status:** {data['Safety Status']}")
-                
-                # Display SSL Certificate
-                st.write("**🔐 SSL Certificate Details:**")
-                st.json(data["SSL Certificate"])
-
-                # Display WHOIS Info
-                st.write("**🌐 WHOIS Information:**")
-                st.json(data["WHOIS Data"])
         else:
             st.warning("No URLs found in the provided text.")
     else:
         st.error("Please enter some text before analyzing.")
-
