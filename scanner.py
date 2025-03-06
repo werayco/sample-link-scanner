@@ -74,3 +74,30 @@ def analyze_urls(text):
         }
 
     return results
+import streamlit as st
+
+st.title("🔍 URL Safety Analyzer")
+st.write("### Enter your query to find job details:")
+user_input = st.text_area("Paste email body or text containing URLs:")
+
+if st.button("Analyze URLs"):
+    if user_input.strip():
+        results = analyze_urls(user_input)
+        
+        if results:
+            for url, data in results.items():
+                st.subheader(f"🔗 URL: {url}")
+                st.write(f"**Safety Status:** {data['Safety Status']}")
+                
+                # Display SSL Certificate
+                st.write("**🔐 SSL Certificate Details:**")
+                st.json(data["SSL Certificate"])
+
+                # Display WHOIS Info
+                st.write("**🌐 WHOIS Information:**")
+                st.json(data["WHOIS Data"])
+        else:
+            st.warning("No URLs found in the provided text.")
+    else:
+        st.error("Please enter some text before analyzing.")
+
